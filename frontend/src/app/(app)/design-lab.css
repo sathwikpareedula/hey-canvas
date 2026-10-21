@@ -1,0 +1,180 @@
+/* Branch-isolated visual language for every existing functional application route.
+   Never imported by the release candidate. Preserve all backend and state semantics. */
+.hey-design-system {
+  --background: #f5f7fc;
+  --foreground: #192540;
+  --surface: #fff;
+  --surface-muted: #edf2ff;
+  --border: #e2e8f3;
+  --muted: #64718a;
+  --accent: #4967db;
+  --accent-fg: #fff;
+  --danger-bg: #fff0f2;
+  --danger-border: #f8ccd4;
+  --danger-text: #a43d53;
+  --warn-bg: #fff7e9;
+  --warn-text: #915c14;
+  background:var(--background);
+  color:var(--foreground);
+  font-family:var(--font-geist-sans),system-ui,sans-serif;
+}
+.dark .hey-design-system,.hey-design-system.dark {
+  --background:#111724;
+  --foreground:#eaf0ff;
+  --surface:#1a2434;
+  --surface-muted:#26344c;
+  --border:#33445d;
+  --muted:#b1bed2;
+  --accent:#98aeff;
+  --accent-fg:#12182a;
+  --danger-bg:#3a222d;
+  --danger-border:#6b3448;
+  --danger-text:#ffd0d9;
+  --warn-bg:#372c1e;
+  --warn-text:#f6d39d;
+}
+.hey-design-system aside[aria-label="Primary"] {
+  border-right:1px solid var(--border);
+  background:var(--surface);
+  box-shadow:7px 0 28px rgba(44,67,113,.025);
+}
+.hey-design-system aside[aria-label="Primary"] > div:first-child {
+  padding-top:31px;
+  padding-bottom:29px;
+}
+.hey-design-system aside[aria-label="Primary"] > div:first-child span:last-child {
+  font-size:23px;
+  letter-spacing:-.9px;
+}
+.hey-design-system aside[aria-label="Primary"] nav > a,
+.hey-design-system aside[aria-label="Primary"] nav a {
+  border-radius:12px;
+  margin-bottom:4px;
+  padding-top:11px;
+  padding-bottom:11px;
+}
+.hey-design-system aside[aria-label="Primary"] nav a[aria-current="page"] {
+  background:var(--surface-muted);
+  color:var(--accent);
+  box-shadow:inset 3px 0 var(--accent);
+}
+.hey-design-system header {
+  border-color:var(--border);
+}
+.hey-design-system header h1 {
+  font-weight:750;
+  letter-spacing:-.5px;
+}
+.hey-design-system main {
+  background:radial-gradient(ellipse at 80% -15%,rgba(136,159,241,.08),transparent 46%),var(--background);
+}
+.hey-design-system main > div {
+  width:100%;
+}
+.hey-design-system main h2 {
+  letter-spacing:-.65px;
+}
+.hey-design-system main h3 {
+  letter-spacing:-.3px;
+}
+.hey-design-system main section.rounded-xl,
+.hey-design-system main div.rounded-xl,
+.hey-design-system main article.rounded-xl {
+  border-radius:17px;
+}
+.hey-design-system main [class*="bg-[var(--surface)]"] {
+  box-shadow:0 8px 26px rgba(31,53,103,.035);
+}
+.hey-design-system a:focus-visible,
+.hey-design-system button:focus-visible,
+.hey-design-system input:focus-visible,
+.hey-design-system select:focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+.hey-design-system input,
+.hey-design-system select,
+.hey-design-system textarea {
+  max-width:100%;
+}
+.hey-design-system :where(p,td,th,code) {
+  overflow-wrap:anywhere;
+}
+@media(max-width:767px) {
+  .hey-design-system main { padding:18px 14px 26px; }
+  .hey-design-system main h2 {font-size:clamp(20px,5vw,27px)}
+}
+@media(prefers-reduced-motion:no-preference) {
+  .hey-design-system a,.hey-design-system button {transition:background-color .16s ease,border-color .16s ease}
+}
+
+/* Shared product surfaces: keep the underlying components and semantics intact. */
+.hey-design-system :where(button,a,input,textarea,select) {
+  -webkit-tap-highlight-color:transparent;
+}
+.hey-design-system :where(button,a) {
+  touch-action:manipulation;
+}
+.hey-design-system :where(input,textarea,select) {
+  color:var(--foreground);
+  accent-color:var(--accent);
+}
+.hey-design-system :where(input,textarea,select)::placeholder {
+  color:var(--muted);
+  opacity:.78;
+}
+.hey-design-system :where(button):disabled {
+  cursor:not-allowed;
+  opacity:.6;
+}
+.hey-design-system :where(table) {
+  border-collapse:separate;
+  border-spacing:0;
+  width:100%;
+}
+.hey-design-system :where(th) {
+  text-align:left;
+  font-size:.73rem;
+  font-weight:700;
+  letter-spacing:.025em;
+}
+.hey-design-system :where(td,th) {
+  padding-block:.7rem;
+  border-bottom:1px solid var(--border);
+}
+.hey-design-system :where(aside,nav,main,section,article) {
+  min-width:0;
+}
+.hey-design-system :where([role="alert"]) {
+  border-radius:12px;
+}
+.hey-design-system :where(pre) {
+  max-width:100%;
+  overflow-x:auto;
+}
+.hey-design-system :where(a):not([class]) {
+  color:var(--accent);
+  text-underline-offset:3px;
+}
+.hey-design-system :where([aria-current="page"]) {
+  font-weight:700;
+}
+.hey-design-system :where(dialog,[role="dialog"]) {
+  color:var(--foreground);
+}
+.hey-design-system :where(:focus-visible) {
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+@media (max-width:640px) {
+  .hey-design-system :where(table) {font-size:.8rem}
+  .hey-design-system :where(td,th) {padding-block:.55rem}
+  .hey-design-system :where(button,input,select,textarea) {font-size:max(16px,1rem)}
+}
+@media (prefers-reduced-motion:reduce) {
+  .hey-design-system *, .hey-design-system *::before, .hey-design-system *::after {
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}

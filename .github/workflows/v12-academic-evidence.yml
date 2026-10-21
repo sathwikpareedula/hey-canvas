@@ -1,0 +1,315 @@
+name: V1.2 Academic Evidence Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "pyproject.toml"
+      - ".github/workflows/v12-academic-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Targeted evidence regressions
+        run: python -m pytest -q backend/tests/test_academic_evidence_compaction_v12.py
+      - name: Full backend tests
+        run: python -m pytest -q backend/tests
+      - name: Ruff
+        if: always()
+        run: python -m ruff check backend
+      - name: Mypy
+        if: always()
+        run: python -m mypy
+
+
+  history-secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Install pinned secret scanner
+        run: go install github.com/zricethezav/gitleaks/v8@v8.30.1
+      - name: Scan complete fetched Git history
+        id: history_scan
+        continue-on-error: true
+        run: |
+          "$(go env GOPATH)/bin/gitleaks" git . --log-opts="--all" --redact --no-banner \
+            --report-format json --report-path /tmp/gitleaks-history.json
+      - name: Scan checked-out files
+        id: working_tree_scan
+        if: always()
+        continue-on-error: true
+        run: |
+          "$(go env GOPATH)/bin/gitleaks" dir . --redact --no-banner \
+            --report-format json --report-path /tmp/gitleaks-working-tree.json
+      - name: Report redacted finding metadata and enforce scan results
+        if: always()
+        env:
+          HISTORY_OUTCOME: ${{ steps.history_scan.outcome }}
+          WORKING_TREE_OUTCOME: ${{ steps.working_tree_scan.outcome }}
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for label, path in (
+              ("history", Path("/tmp/gitleaks-history.json")),
+              ("working-tree", Path("/tmp/gitleaks-working-tree.json")),
+          ):
+              findings = json.loads(path.read_text()) if path.exists() else []
+              print(f"{label} findings: {len(findings)}")
+              for finding in findings:
+                  print(
+                      " - "
+                      f"rule={finding.get('RuleID', 'unknown')} "
+                      f"file={finding.get('File', 'unknown')} "
+                      f"line={finding.get('StartLine', 'unknown')} "
+                      f"commit={finding.get('Commit', '')[:12] or 'working-tree'} "
+                      f"fingerprint={finding.get('Fingerprint', 'unknown')}"
+                  )
+          PY
+          if [ "$HISTORY_OUTCOME" != "success" ] || [ "$WORKING_TREE_OUTCOME" != "success" ]; then
+            exit 1
+          fi
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        if: always()
+        run: npm run typecheck
+      - name: Frontend tests
+        if: always()
+        run: npm run test
+      - name: Production build
+        if: always()
+        run: npm run build
+      - name: Production dependency audit
+        if: always()
+        run: npm audit --omit=dev --audit-level=high
+      - name: Full dependency audit (including development tools)
+        if: always()
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+  windows-backend-synthetic:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install synthetic backend test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Full backend suite on Windows (no real Canvas or Ollama)
+        run: python -m pytest -q backend/tests
+      - name: Windows launcher assertions
+        if: always()
+        run: python -m pytest -q backend/tests/test_windows_launcher.py
+      - name: Parse Windows launcher PowerShell scripts
+        if: always()
+        shell: pwsh
+        run: |
+          $scripts = Get-ChildItem launcher/windows -Filter *.ps1 -File
+          foreach ($script in $scripts) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $script.FullName, [ref]$tokens, [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              foreach ($parseError in $errors) {
+                Write-Error "$($script.Name): $($parseError.Message)"
+              }
+              exit 1
+            }
+          }
+          Write-Host "Parsed $($scripts.Count) PowerShell launcher scripts."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked frontend for Windows launcher smoke
+        working-directory: frontend
+        run: npm ci
+      - name: Windows clean-clone first-run and restart acceptance (no Canvas or Ollama)
+        shell: pwsh
+        env:
+          ACADEMIC_MODEL_PROVIDER: ollama
+          OLLAMA_BASE_URL: http://127.0.0.1:18181
+          DATABASE_URL: sqlite:///./.hey-canvas/run/ci-launcher-smoke.db
+          HEY_CANVAS_BACKEND_PORT: "18180"
+          HEY_CANVAS_FRONTEND_PORT: "13181"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:HEY_CANVAS_VENV_PYTHON = (Get-Command python).Source
+          Copy-Item .env.example .env
+          function Assert-AppReady {
+            $backend = Invoke-WebRequest -Uri "http://127.0.0.1:18180/health" -UseBasicParsing -TimeoutSec 15
+            $readiness = Invoke-WebRequest -Uri "http://127.0.0.1:18180/api/readiness" -UseBasicParsing -TimeoutSec 15
+            $startup = Invoke-WebRequest -Uri "http://localhost:13181/startup" -UseBasicParsing -TimeoutSec 15
+            $dashboard = Invoke-WebRequest -Uri "http://localhost:13181/dashboard" -UseBasicParsing -TimeoutSec 15
+            if (
+              $backend.StatusCode -ne 200 -or
+              $readiness.StatusCode -ne 200 -or
+              $startup.StatusCode -ne 200 -or
+              $startup.Content -notmatch "Hey Canvas" -or
+              $dashboard.StatusCode -ne 200
+            ) {
+              throw "Clean-clone first-run readiness checks failed"
+            }
+          }
+          try {
+            & cmd.exe /d /c launcher\windows\Start-HeyCanvas.cmd -NoBrowser -SkipOllama
+            if ($LASTEXITCODE -ne 0) {
+              throw "The documented Windows launcher failed with exit code $LASTEXITCODE"
+            }
+            Assert-AppReady
+            if (-not (Test-Path ".hey-canvas/run/ci-launcher-smoke.db")) {
+              throw "The first-run database was not created"
+            }
+
+            # A repeated start must reuse only this checkout's verified services.
+            & ./launcher/windows/Start-HeyCanvas.ps1 -NoBrowser -SkipOllama
+            Assert-AppReady
+
+            & ./launcher/windows/Stop-HeyCanvas.ps1
+            & ./launcher/windows/Start-HeyCanvas.ps1 -NoBrowser -SkipOllama
+            Assert-AppReady
+
+            & ./launcher/windows/Stop-HeyCanvas.ps1
+            & cmd.exe /d /c launcher\windows\Start-HeyCanvas-Demo.cmd -NoBrowser -SkipOllama
+            if ($LASTEXITCODE -ne 0) {
+              throw "The explicit demo launcher failed with exit code $LASTEXITCODE"
+            }
+            Assert-AppReady
+            $assistant = Invoke-RestMethod -Uri "http://127.0.0.1:18180/api/assistant/status" -TimeoutSec 15
+            $courses = @(Invoke-RestMethod -Uri "http://127.0.0.1:18180/api/courses" -TimeoutSec 15)
+            if ($assistant.provider -ne "synthetic" -or $courses.Count -eq 0) {
+              throw "The demo launcher did not expose a populated synthetic catalog"
+            }
+            if (@($courses | Where-Object {
+              -not $_.canvas_course_id -or
+              -not $_.canvas_course_id.StartsWith("synthetic-")
+            }).Count -ne 0) {
+              throw "The isolated demo catalog contains a non-synthetic course"
+            }
+            Write-Host "Windows clean-clone first-run and restart acceptance passed"
+          }
+          finally {
+            & ./launcher/windows/Stop-HeyCanvas.ps1
+          }
+
+
+  browser-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: sqlite:///./.hey-canvas/verify-browser/synthetic.db
+      ACADEMIC_MODEL_PROVIDER: synthetic
+      LOCAL_API_GUARD_ENABLED: "true"
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:18000
+      NEXT_PUBLIC_ACADEMIC_API_MODE: http
+      HEY_CANVAS_NEXT_DIST_DIR: .next-verify-e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install synthetic stack and browser
+        run: |
+          python -m pip install -e ".[dev]" playwright
+          python -m playwright install --with-deps chromium
+          cd frontend && npm ci
+      - name: Seed isolated database
+        run: |
+          mkdir -p .hey-canvas/verify-browser
+          academic-seed-demo --database-path .hey-canvas/verify-browser/synthetic.db
+      - name: Build Next frontend for isolated API
+        working-directory: frontend
+        run: npm run build
+      - name: Start isolated synthetic services
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 18000 --app-dir backend > /tmp/hey-backend.log 2>&1 &
+          cd frontend
+          npx next start -p 13117 -H 127.0.0.1 > /tmp/hey-frontend.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:18000/health >/dev/null && curl -fsS http://127.0.0.1:13117/dashboard >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/hey-backend.log /tmp/hey-frontend.log
+          exit 1
+      - name: Playwright synthetic browser journeys (390px and recovery)
+        run: python scripts/e2e/browser_journeys_v12.py --backend http://127.0.0.1:18000 --frontend http://127.0.0.1:13117 --out .hey-canvas/verify-browser/shots
+      - name: Preserve synthetic service diagnostics
+        if: always()
+        run: |
+          mkdir -p .hey-canvas/verify-browser/logs
+          for service in backend frontend; do
+            if [ -f "/tmp/hey-${service}.log" ]; then
+              cp "/tmp/hey-${service}.log" ".hey-canvas/verify-browser/logs/${service}.log"
+            fi
+          done
+          if [ "${{ job.status }}" != "success" ]; then
+            echo "::group::Backend service diagnostics"
+            tail -n 120 /tmp/hey-backend.log 2>/dev/null || true
+            echo "::endgroup::"
+            echo "::group::Frontend service diagnostics"
+            tail -n 120 /tmp/hey-frontend.log 2>/dev/null || true
+            echo "::endgroup::"
+          fi
+      - name: Upload synthetic browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-browser-synthetic
+          path: |
+            .hey-canvas/verify-browser/shots/
+            .hey-canvas/verify-browser/logs/
+          if-no-files-found: ignore

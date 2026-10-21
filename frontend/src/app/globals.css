@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7f9;
+  --foreground: #111318;
+  --surface: #ffffff;
+  --surface-muted: #eef0f4;
+  --border: #d8dde6;
+  --muted: #5c6578;
+  --accent: #1d4ed8;
+  --accent-fg: #ffffff;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --warn-bg: #fff7ed;
+  --warn-text: #9a3412;
+}
+
+:root.dark,
+html.dark {
+  --background: #0c0e12;
+  --foreground: #e8eaef;
+  --surface: #141820;
+  --surface-muted: #1b2130;
+  --border: #2a3344;
+  --muted: #9aa3b5;
+  --accent: #60a5fa;
+  --accent-fg: #0c0e12;
+  --danger-bg: #2a1215;
+  --danger-border: #7f1d1d;
+  --danger-text: #fecaca;
+  --warn-bg: #2a1a0f;
+  --warn-text: #fdba74;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.assistant-answer {
+  overflow-wrap: anywhere;
+}
+
+.assistant-answer table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+*:focus-visible {
+  outline-color: var(--accent);
+}
+
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  .study-guide-print {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

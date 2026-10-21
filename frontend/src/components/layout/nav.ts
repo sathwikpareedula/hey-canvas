@@ -1,0 +1,32 @@
+export const NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/today", label: "Today" },
+  { href: "/calendar", label: "Calendar" },
+  { href: "/", label: "Hey Canvas", short: "Chat" },
+  { href: "/courses", label: "All courses" },
+  { href: "/assignments", label: "Assignments" },
+  { href: "/materials", label: "Materials" },
+  { href: "/changes", label: "Changes" },
+  { href: "/workload", label: "Workload" },
+  { href: "/study", label: "Study workspace" },
+  { href: "/notifications", label: "Notifications" },
+  { href: "/sync", label: "Sync history" },
+] as const;
+
+export const PAGE_TITLES: Record<string, string> = {
+  "/": "Hey Canvas",
+  "/dashboard": "Dashboard",
+  "/today": "Today",
+  "/calendar": "Calendar",
+  "/courses": "Courses",
+  "/assignments": "Assignments",
+  "/materials": "Materials",
+  "/changes": "Changes",
+  "/settings": "Settings",
+  "/onboarding": "Setup",
+  "/workload": "Workload",
+  "/sync": "Sync history",
+  "/notifications": "Notifications",
+  "/study": "Study session",
+  "/study/guide": "Study guide",
+};

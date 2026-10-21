@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hey-canvas"
+version = "0.1.0"
+description = "A secure, local-first academic knowledge workspace with course-aware assistance."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Sathwik Pareedula" }]
+dependencies = [
+    "fastapi>=0.115,<1",
+    "httpx>=0.28,<1",
+    "pypdf>=6.5,<7",
+    "python-docx>=1.2,<2",
+    "python-pptx>=1.0,<2",
+    "pydantic-settings>=2.7,<3",
+    "sqlalchemy>=2.0,<3",
+    "tzdata>=2025.2; platform_system == 'Windows'",
+    "uvicorn[standard]>=0.34,<1",
+]
+
+[project.scripts]
+canvas-check = "app.canvas.check:run"
+canvas-sync-assignments = "app.sync.assignments_cli:run"
+canvas-sync-courses = "app.sync.courses_cli:run"
+canvas-sync-modules = "app.sync.modules_cli:run"
+canvas-sync-file-metadata = "app.sync.files_metadata_cli:run"
+canvas-download-files = "app.sync.files_download_cli:run"
+academic-changes = "app.sync.changes_cli:run"
+canvas-sync-all = "app.sync.all_cli:run"
+academic-ingest-file = "app.sync.documents_cli:run_file"
+academic-ingest-course = "app.sync.documents_cli:run_course"
+academic-document-search = "app.sync.documents_cli:run_search"
+academic-retrieve = "app.sync.retrieval_cli:run"
+academic-seed-demo = "app.dev_fixture:run"
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.14,<2",
+    "pytest>=8.3,<9",
+    "pytest-asyncio>=0.25,<1",
+    "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/app"]
+
+[tool.pytest.ini_options]
+addopts = "-q --basetemp=.pytest-tmp"
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/tests/**" = ["E402", "I001"]
+"scripts/**" = ["E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["app"]
+mypy_path = "backend"
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "app.security.local_api_guard"
+disable_error_code = ["no-any-return"]
