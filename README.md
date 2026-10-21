@@ -2,7 +2,7 @@
 
 **What if your AI study assistant actually understood your courses?**
 
-As a computer science student, I found myself constantly switching between Canvas assignments, lecture notes, announcements, calendars, and AI chats just to figure out what to study next.
+As a computer science student, I found myself constantly switching between Canvas assignments, lecture notes, announcements, calendars, and AI chats just to understand difficult topics, connect them to what I was learning in class, and figure out what to study next.
 
 Generic AI assistants can explain a concept, but they don't automatically know which course you're asking about, what your professor covered, or which deadline is approaching.
 
