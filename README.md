@@ -115,21 +115,11 @@ For additional implementation detail, see the [engineering case study](PROJECT_S
 
 ## Engineering verification
 
-The latest reviewed Windows acceptance and GitHub Actions checks cover commit `32966dd4524aedfc13e54a6e6f0508c31e800fa1`. This remains a private release candidate, not a fully green or production-certified release.
+The published release has a clean source-history baseline and automated checks on the current application snapshot. [GitHub Actions run #39676551978](https://github.com/sathwikpareedula/hey-canvas/actions/runs/39676551978) passed all five jobs on application commit `487b6fc`: history secret scan, frontend, backend, synthetic browser journeys, and Windows synthetic acceptance.
 
-| Validation | Recorded result |
-|---|---|
-| Backend pytest | **Passed**; 1,083/1,083 in final local Windows acceptance |
-| Ruff / strict mypy | **Passed**; strict mypy covered 206 source files in final local Windows acceptance |
-| Frontend Vitest | **311 passed, 12 skipped** |
-| TypeScript / ESLint / production build | **Passed**; Next.js production build generated **20 routes** |
-| Windows clean-checkout launcher/start/stop/restart | **Passed** in GitHub-hosted Windows CI |
-| Real Ollama complete rerun | **16/22 passed** with `llama3.2:3b` |
-| Targeted post-routing real-provider checks | **3/3 passed**, not a full repeat of the 22-case evaluation |
+The release audit reported **1,083 backend tests passed**, **310 frontend tests passed**, and **zero findings** from Gitleaks history and tracked-file scans. Production-only dependency audit reported zero vulnerabilities; a development-only transitive `braces` advisory remained noted. These are recorded release results, not a guarantee of security or academic answer accuracy.
 
-An earlier 22-case real-model evaluation measured **32.809 seconds mean time to first text** and **53.032 seconds mean total response time**. Five cases exceeded the 120-second bound, and another returned a safe fallback that did not satisfy the evaluation rule. The three later targeted deterministic-routing checks finished in approximately 1.5–3 seconds; they do not establish general model latency.
-
-The final review CI also passed **22/22 synthetic browser journeys**, the full-history secret scan (with 13 reviewed exact-fingerprint exclusions), and the production-only dependency audit (zero findings). **Overall CI remains red** because the development-inclusive audit detects an upstream `braces` advisory with no verified compatible patch. See the [verification and limitations summary](VERIFICATION.md).
+**The robotics screenshot uses the deterministic synthetic demo provider, not Ollama generation.** Optional Ollama-backed responses are a separate local mode. Earlier real-model evaluation had limitations, documented in [VERIFICATION.md](VERIFICATION.md).
 
 ## Local development (Windows)
 
@@ -148,7 +138,7 @@ Copy-Item .env.example .env
 
 Keep `.env` local and private. Configure an authorized Canvas connection through the app; for model-generated explanations, install Ollama and a compatible model separately. See the [complete Windows setup guide](docs/SETUP-WINDOWS.md) before using real academic data.
 
-This repository contains the verified V1.2 release snapshot on the default `main` branch. The repository remains private until a separate publication decision. Use a separate directory, isolated ports, and synthetic fixtures when evaluating a candidate alongside an existing installation. Avoid pointing two checkouts at the same real database.
+This repository contains the public V1.2 source snapshot on the default `main` branch. The original development repository remains private. Use a separate directory, isolated ports, and synthetic fixtures when evaluating a candidate alongside an existing installation. Avoid pointing two checkouts at the same real database.
 
 Start through `launcher\windows\Start-HeyCanvas.cmd`; stop with `launcher\windows\Stop-HeyCanvas.cmd`. To inspect the interface with synthetic data, use `launcher\windows\Start-HeyCanvas-Demo.cmd` after completing installation. Demo content is not real Canvas data or evidence of model accuracy. The startup interface normally runs at `http://localhost:3001/startup`. Model downloads and browser microphone permissions are user controlled; no real Canvas credentials are needed for synthetic demos.
 
@@ -187,6 +177,6 @@ MIT licensed. See [LICENSE](LICENSE). The project is independent of and not endo
 - Real-model reliability is still being evaluated; the latest complete 22-case evaluation was **16/22**. Subsequent owner-device acceptance verified real streaming, cancellation before and after first text, follow-up requests, and structured failures; these do not establish general answer accuracy.
 - Twelve frontend integration-marked tests were skipped in the recorded ordinary run. Fresh Windows clean-checkout startup/restart is verified in CI, but real Canvas authorization, Ollama inference and physical microphone permissions are not covered by that clean-install test. The development-only `braces` advisory remains open.
 - Browser voice input remains experimental; physical microphone capture has not been accepted. A fresh real Canvas sync was not authorized during owner-device acceptance.
-- **V1.2 release hold remains active pending public-history/privacy approval.** No production deployment or public-service claim.
+- **The V1.2 source repository is public.** There is no hosted production service, and the synthetic demo is not proof of local-model answer accuracy.
 
 This project is a study and organization tool, not an automated exam taker, assignment submitter, or grading authority.
