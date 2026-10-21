@@ -1,35 +1,79 @@
 # Hey Canvas
 
-**A local-first academic workspace with course-aware AI assistance.**
+**What if your AI study assistant actually understood your courses?**
 
-Hey Canvas brings authorized Canvas LMS courses, assignments, deadlines, announcements, and learning materials into a single study workspace. I built it to reduce the back-and-forth between course pages, downloaded files, calendars, and generic AI chats that don't know which class or assessment a student is asking about.
+As a computer science student, I found myself constantly switching between Canvas assignments, lecture notes, announcements, calendars, and AI chats just to figure out what to study next.
 
-The application combines a **Next.js / React / TypeScript** interface with a **Python / FastAPI / SQLAlchemy / SQLite** backend and optional **on-device inference through Ollama**. It prioritizes reliable academic records, course-scoped context, source evidence, and control over local data.
+Generic AI assistants can explain a concept, but they don't automatically know which course you're asking about, what your professor covered, or which deadline is approaching.
 
-**[Read the engineering case study →](PROJECT_STORY.md)**
+I built **Hey Canvas** to bring those experiences together.
 
-> Independent student project; not affiliated with or endorsed by Instructure. V1.2 is a locally tested acceptance candidate, **not** a publicly deployed service.
+It's a **local-first, course-aware AI academic copilot** that connects authorized Canvas information with an interactive study assistant—helping students understand concepts using supporting course materials, ask questions about deadlines, and decide what deserves their attention.
 
-## Application preview
+**Ask about your courses. Understand the material. Know what to work on next.**
 
-| Academic dashboard | Course-aware assistant |
+[Explore the engineering case study →](PROJECT_STORY.md) · [Run the synthetic demo →](#local-development-windows) · [See how the AI works →](#how-the-ai-assistant-works)
+
+> Independent student-built project, not affiliated with or endorsed by Instructure or any university. This is a locally tested release candidate, not a publicly hosted service.
+
+## Meet the academic copilot
+
+Imagine asking **“Can you explain forward kinematics for a two-link robotic arm using my course materials?”** instead of copying lecture notes into a separate chatbot. Or asking **“What's due this week, and what should I prioritize?”** instead of checking each course manually.
+
+Hey Canvas connects academic questions to the **selected course, available records, and supported source evidence**. For structured questions, it can use deterministic logic; for explanations, it can optionally stream responses from a local Ollama model. It distinguishes retrieved course evidence from generated explanations rather than treating a model's guess as a verified professor instruction.
+
+### AI assistant and course context
+
+![Hey Canvas course-aware assistant interface with synthetic academic context](portfolio-assets/hey-canvas/02-ai-study-assistant.png)
+
+*The existing image shows the assistant interface with synthetic course data. A verified concept-explanation conversation and a grounded deadline-answer screenshot are being prepared separately; this image is not presented as proof of real-model accuracy.*
+
+### The academic workspace behind the answers
+
+| Course overview | Today and priorities |
 |:---:|:---:|
-| ![Hey Canvas dashboard populated with synthetic course data](portfolio-assets/hey-canvas/01-dashboard-desktop.png) | ![Hey Canvas study assistant showing a synthetic course conversation and evidence interface](portfolio-assets/hey-canvas/02-ai-study-assistant.png) |
+| ![Hey Canvas dashboard with synthetic course data](portfolio-assets/hey-canvas/01-dashboard-desktop.png) | ![Hey Canvas daily priorities using synthetic assignments](portfolio-assets/hey-canvas/03-today-priorities.png) |
 
-**Academic dashboard:** Consolidates courses, deadlines, and workload into a single overview. **Course-aware assistant:** Demonstrates the conversational interface and evidence presentation for academic questions. These are synthetic demo captures, not proof of real-model answer accuracy.
+The dashboard, deadlines, and calendar are not the whole product: **they provide structured context for the assistant** so academic questions can be answered with reference to actual available records rather than disconnected chat history.
 
 <details>
-<summary>Additional synthetic application views</summary>
+<summary>More application views: calendar, course materials, and mobile</summary>
 
-| Today and priorities | Deadline calendar |
+| Deadline calendar | Course materials |
 |:---:|:---:|
-| ![Daily priorities in synthetic demo mode](portfolio-assets/hey-canvas/03-today-priorities.png) | ![Academic calendar in synthetic demo mode](portfolio-assets/hey-canvas/04-deadline-calendar.png) |
+| ![Academic calendar using synthetic data](portfolio-assets/hey-canvas/04-deadline-calendar.png) | ![Course materials and preparation status using synthetic data](portfolio-assets/hey-canvas/05-course-materials.png) |
 
-| Course materials | Mobile workspace |
-|:---:|:---:|
-| ![Course materials with preparation status in synthetic demo mode](portfolio-assets/hey-canvas/05-course-materials.png) | ![Responsive mobile Hey Canvas interface using synthetic data](portfolio-assets/hey-canvas/06-mobile-view.png) |
+![Responsive mobile workspace using synthetic data](portfolio-assets/hey-canvas/06-mobile-view.png)
 
 </details>
+
+## How the AI assistant works
+
+1. **Connect authorized course data.** Read-only Canvas synchronization brings course, assignment, deadline, and announcement records into local storage.
+2. **Prepare available evidence.** Supported course files can be cached, text-extracted, and indexed within bounded preparation limits; not every Canvas file is automatically downloaded or searchable.
+3. **Route the question.** Course selection, academic intent, and available records help determine which context belongs in an answer.
+4. **Choose the response path.** Structured academic questions can use deterministic logic; explanatory questions may use an optional local Ollama model with retrieved evidence.
+5. **Make the response inspectable.** Source-aware answers, streaming, cancellation, and clear unavailable-evidence states help users distinguish verified records from generated guidance.
+
+```text
+Authorized Canvas API (read-only)
+            |
+   Local sync + SQLite
+            |
+  Course records + supported files
+            |
+   Course-scoped retrieval
+            |
+   Academic intent routing
+       /          \
+Structured logic   Optional local Ollama
+       \          /
+  Source-aware assistant
+            |
+    Next.js study workspace
+```
+
+**Built with:** Next.js, React, TypeScript, Tailwind CSS, Python, FastAPI, SQLAlchemy, SQLite, and optional Ollama. [Architecture and design decisions →](PROJECT_STORY.md)
 
 ## What it does
 
