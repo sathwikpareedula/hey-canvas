@@ -1,6 +1,8 @@
 # Verification and project scope
 
-> **Public release update — October 21, 2026:** This source repository is now public. The final application/showcase commit `487b6fc` passed all five jobs in [GitHub Actions run #39676551978](https://github.com/sathwikpareedula/hey-canvas/actions/runs/39676551978), including history scanning, frontend, backend, browser, and Windows synthetic acceptance. Release audit reported zero Gitleaks findings on the clean repository history and tracked files. The robotics showcase uses a **prewritten deterministic synthetic response**, not an Ollama-generated answer. Older sections below describe historical checkpoints in the original private development repository and should not be mistaken for current release status. Real-model limitations remain relevant.\n\nHey Canvas V1.2 is a **local-first acceptance candidate**, not a publicly deployed production service.
+> **Public release update — October 21, 2026:** This source repository is now public. The final application/showcase commit `487b6fc` passed all five jobs in [GitHub Actions run #39676551978](https://github.com/sathwikpareedula/hey-canvas/actions/runs/39676551978), including history scanning, frontend, backend, browser, and Windows synthetic acceptance. Release audit reported zero Gitleaks findings on the clean repository history and tracked files. The robotics showcase uses a **prewritten deterministic synthetic response**, not an Ollama-generated answer. Older sections below describe historical checkpoints in the original private development repository and should not be mistaken for current release status. Real-model limitations remain relevant.
+
+Hey Canvas V1.2 is a **local-first acceptance candidate**, not a publicly deployed production service.
 
 ## Latest verified review-branch acceptance (October 20, 2026)
 
