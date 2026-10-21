@@ -21,7 +21,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 BASE_URL = os.environ.get("HEY_CANVAS_SCREENSHOT_BASE_URL", "http://localhost:3001")
-DEMO_COURSE_ID = "course-robots"
+DEMO_COURSE_ID = "synthetic-robotics"
 OUTPUT_DIR = os.path.abspath("portfolio-assets/hey-canvas")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -69,11 +69,11 @@ def capture_all():
     finally:
         driver.quit()
 
-    # 2. AI Study Assistant with Quiz 3 Study Plan & Citations (1280x900)
+    # 2. AI Study Assistant with Two-Link Forward Kinematics Explanation (1280x1350)
     print("\n[2/6] Capturing 02-ai-study-assistant.png...")
-    driver = create_driver(1280, 950)
+    driver = create_driver(1280, 1350)
     try:
-        prompt_text = "Help me prepare for Quiz 3 using the syllabus, announcements, and lecture materials."
+        prompt_text = "Can you explain forward kinematics for a two-link robotic arm using my course materials?"
         encoded_prompt = quote_plus(prompt_text)
         open_demo_route(driver, f"/?courseId={DEMO_COURSE_ID}&prompt={encoded_prompt}")
         print("Dispatched prompt to assistant, waiting for streaming response...")
@@ -82,13 +82,24 @@ def capture_all():
         start_t = time.time()
         for i in range(35):
             time.sleep(1)
-            # Check if messages or citation elements are populated
-            text = driver.find_element(By.TAG_NAME, "body").text
-            if "Quiz 3" in text and ("Syllabus" in text or "Evidence" in text or "Robotics" in text or "Module" in text or "Exam" in text or "Grade" in text):
+            body_text = driver.find_element(By.TAG_NAME, "body").text
+            if "forward kinematics" in body_text.casefold() and ("worked example" in body_text.casefold() or "two-link" in body_text.casefold() or "kinematics equations" in body_text.casefold()):
                 print(f"Response detected after {time.time() - start_t:.1f}s")
-                # Wait 5 more seconds for stream completion
-                time.sleep(5)
+                time.sleep(3)
                 break
+        
+        # Ensure user prompt is visible at top of conversation
+        driver.execute_script("""
+            const allElements = Array.from(document.querySelectorAll('*'));
+            const userMsg = allElements.find(el => 
+                el.children.length === 0 && 
+                el.textContent.includes('Can you explain forward kinematics')
+            );
+            if (userMsg) {
+                userMsg.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+        """)
+        time.sleep(1)
         
         out_path = os.path.join(OUTPUT_DIR, "02-ai-study-assistant.png")
         driver.save_screenshot(out_path)

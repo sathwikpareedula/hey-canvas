@@ -132,6 +132,37 @@ class SyntheticAcademicModelProvider(AcademicModelProvider):
                 "In the worst case with an uninformative heuristic, it can be exponential O(b^d), "
                 "where b is the branching factor and d is the goal depth."
             )
+        if ("forward kinematics" in q or "kinematics" in q) and (
+            "two-link" in q or "2-link" in q or "two link" in q or "robotic" in q or "arm" in q
+        ):
+            return (
+                "Based on the course materials in Synthetic Kinematics Notes.pdf, "
+                "here is an explanation of forward kinematics for a two-link "
+                "planar robotic arm:\n\n"
+                "1. Concept and Purpose\n"
+                "Forward kinematics determines the Cartesian position (x, y) of the robot's "
+                "end-effector (tool tip) in the workspace from specified joint angles and "
+                "known link lengths.\n\n"
+                "2. Two-Link Arm Geometry\n"
+                "• Base Frame (0, 0): Fixed reference point where Joint 1 is anchored.\n"
+                "• Link 1 (length L1): Rotates by joint angle theta1 relative to the base frame "
+                "positive x-axis.\n"
+                "• Link 2 (length L2): Connected to Link 1 at Joint 2; rotates by relative joint "
+                "angle theta2 with respect to Link 1.\n"
+                "• End-Effector Orientation: Because theta2 is relative to Link 1, the total angle "
+                "of Link 2 in the base frame is (theta1 + theta2).\n\n"
+                "3. Forward Kinematics Equations\n"
+                "Projecting each link vector onto the coordinate axes:\n"
+                "• x = L1 * cos(theta1) + L2 * cos(theta1 + theta2)\n"
+                "• y = L1 * sin(theta1) + L2 * sin(theta1 + theta2)\n\n"
+                "4. Worked Example\n"
+                "Given link lengths L1 = 10 cm and L2 = 5 cm, with joint angles "
+                "theta1 = 0 rad (0°) and theta2 = pi/2 rad (90°):\n"
+                "• x = 10 * cos(0°) + 5 * cos(0° + 90°) = 10 * 1 + 5 * 0 = 10 cm\n"
+                "• y = 10 * sin(0°) + 5 * sin(0° + 90°) = 10 * 0 + 5 * 1 = 5 cm\n"
+                "The end-effector is positioned at (x, y) = (10, 5) cm, extending along the "
+                "positive x-axis and turning vertically upward."
+            )
         if (
             any(t in q for t in ("summarize this professor pdf", "summarize", "professor pdf"))
             and model_input.evidence

@@ -20,6 +20,7 @@ from app.database.models import (
     CanvasFile,
     ChangeEvent,
     Course,
+    CourseMaterialReference,
     CourseModule,
     DocumentUnit,
     ModuleItem,
@@ -155,7 +156,28 @@ def _populate(session: Session, now: datetime) -> None:
             1,
             None,
             "Forward Kinematics",
-            "Synthetic notes explain coordinate frames, transforms, and forward kinematics.",
+            (
+                "Forward Kinematics for a Two-Link Planar Arm:\n\n"
+                "Forward kinematics determines the Cartesian position (x, y) of the "
+                "end-effector from joint angles (theta_1, theta_2) and link lengths (L1, L2).\n\n"
+                "Planar Arm Geometry:\n"
+                "• Base frame is at origin (0, 0).\n"
+                "• Link 1 has length L1 and rotates by joint angle theta_1 relative to "
+                "the positive x-axis.\n"
+                "• Link 2 has length L2 and rotates by relative joint angle theta_2 "
+                "with respect to Link 1.\n"
+                "• The total orientation of Link 2 in the base coordinate frame is "
+                "(theta_1 + theta_2).\n\n"
+                "Kinematics Equations:\n"
+                "• x = L1 * cos(theta_1) + L2 * cos(theta_1 + theta_2)\n"
+                "• y = L1 * sin(theta_1) + L2 * sin(theta_1 + theta_2)\n\n"
+                "Worked Example:\n"
+                "Given L1 = 10 cm, L2 = 5 cm, theta_1 = 0 rad (0 deg), "
+                "theta_2 = pi/2 rad (90 deg):\n"
+                "x = 10 * cos(0) + 5 * cos(90) = 10 * 1 + 5 * 0 = 10 cm\n"
+                "y = 10 * sin(0) + 5 * sin(90) = 10 * 0 + 5 * 1 = 5 cm\n"
+                "The end-effector position is (x, y) = (10, 5) cm."
+            ),
         ),
         (
             "synthetic-file-robotics-slides",
@@ -179,6 +201,7 @@ def _populate(session: Session, now: datetime) -> None:
             content_type=content_type,
             size=len(text_value.encode()),
             metadata_fingerprint=hashlib.sha256(filename.encode()).hexdigest(),
+            downloaded_metadata_fingerprint=hashlib.sha256(filename.encode()).hexdigest(),
             first_seen_at=now,
             last_seen_at=now,
             last_synced_at=now,
@@ -187,6 +210,15 @@ def _populate(session: Session, now: datetime) -> None:
             download_state="downloaded",
         )
         session.add(canvas_file)
+        session.add(
+            CourseMaterialReference(
+                course_id=robotics.canvas_course_id,
+                canvas_file_id=file_id,
+                source_module_item_id=f"synthetic-module-item-{index}",
+                first_seen_at=now,
+                last_seen_at=now,
+            )
+        )
         session.flush()
         module.items.append(
             ModuleItem(
