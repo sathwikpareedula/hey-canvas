@@ -11,4 +11,4 @@ One-off verification helpers for local machine runs. Output goes to `.hey-canvas
 - `publication-scan.ps1` — bounded secret-pattern scan of **tracked** files.
 - `ollama_repeat_measure.py` — repeat latency samples for top candidates after warm-up.
 
-Latest full diagnostic on this machine (2026-10-03): see `.hey-canvas/diagnostic/ollama-benchmark-20261003T110630Z.json`. Practical default candidate from measurements: **qwen3:4b-instruct** (7/7 tasks, lowest warm total among full passes); fastest TTFT among passes: **qwen3.5:2b**. Historical diagnostic results are not a guarantee of current model performance or shipped defaults.
+Historical local diagnostic (2026-10-03): see `.hey-canvas/diagnostic/ollama-benchmark-20261003T110630Z.json`. Candidate from those measurements: **qwen3:4b-instruct** (7/7 tasks, lowest warm total among full passes); fastest TTFT among passes: **qwen3.5:2b**. Historical diagnostic results are not a guarantee of current model performance or shipped defaults.
