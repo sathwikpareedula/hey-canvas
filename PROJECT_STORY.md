@@ -1,80 +1,77 @@
 # Engineering Hey Canvas
 
-**Full-stack development, academic data engineering, and reliability-focused AI integration.**
+**Full-stack software engineering, academic data integration, and reliability-focused AI application development.**
 
-## The problem
+## Problem
 
-As a computer science student, I found that information needed for a single study session could be scattered across Canvas courses, assignments, announcements, syllabi, and lecture materials. Generic chatbots can explain concepts, but they often have no reliable way to identify the correct course, confirm an actual deadline, or distinguish a professor's instructions from an invented answer.
+Course information is fragmented across assignments, announcements, calendars, and documents. Generic AI assistants do not inherently know which course a question concerns or whether a claimed deadline is supported by an actual record.
 
-I built Hey Canvas to connect those two workflows: trustworthy academic records and context-aware study assistance.
+Hey Canvas explores how a local-first workspace can combine structured academic data with course-aware study assistance.
 
-## The solution
+## What I built
 
-Hey Canvas is a Windows-oriented, local-first academic workspace. A Next.js/React interface brings courses, upcoming work, materials, and conversations together. A Python/FastAPI backend synchronizes authorized Canvas records through read-only APIs, normalizes them into SQLite, and prepares supported document content for course-scoped retrieval.
+The Next.js/React interface provides courses, upcoming work, materials, and an academic assistant. A Python/FastAPI backend reads authorized Canvas LMS data, normalizes supported records in SQLite, and prepares supported document text for course-scoped retrieval.
 
-The assistant separates structured facts from generated explanations. Known deadline and assignment questions can use deterministic data paths rather than asking a language model to manufacture an answer. For explanations and study guidance, the orchestration layer can use course evidence with a locally hosted Ollama model.
+The assistant distinguishes two paths:
 
-## Architecture and implementation
+- **Structured academic questions:** deterministic retrieval from available records, avoiding unnecessary model inference.
+- **Explanatory study questions:** optional local Ollama generation using available course context and source evidence.
+
+Neither path guarantees completeness or correctness. Missing or unprepared evidence is not treated as proof that an item does not exist.
+
+## Architecture
 
 ```text
-Read-only Canvas API
-        |
-Secure incremental synchronization
-        |
-FastAPI + SQLAlchemy + SQLite
-        |                         \
-Structured academic records     Managed document cache
-        |                         |
-Deterministic academic queries   Text preparation, provenance, indexing
-        \                         /
-          Course-scoped evidence and routing
-                         |
-              Assistant orchestration
-               /                 \
-      Deterministic answers    Ollama inference
-               \                 /
-           Streaming student interface
-                Next.js / React
+Authorized Canvas LMS (read-only API)
+                |
+      Guarded synchronization
+                |
+       FastAPI + SQLAlchemy
+                |
+       SQLite course records ---- Supported file cache
+                |                         |
+     Structured fact retrieval    Text extraction and provenance
+                \                         /
+                 Course-scoped context
+                          |
+                  Academic intent routing
+                   /                 \
+       Deterministic responses    Optional Ollama
+                   \                 /
+                Source-aware UI
+              Next.js / React
 ```
 
-The implementation spans **Python, FastAPI, Pydantic, SQLAlchemy, SQLite, HTTPX, Next.js, React, TypeScript, Ollama, pytest, mypy, Ruff, Vitest, and Windows PowerShell**.
+**Technologies:** Python, FastAPI, Pydantic, HTTPX, SQLAlchemy, SQLite, Next.js, React, TypeScript, Tailwind CSS, optional Ollama, pytest, Ruff, mypy, Vitest, Playwright, and GitHub Actions.
 
-## Hard engineering problems
+## Engineering challenges
 
-### Building a knowledge system, not just a file list
+### Distinguishing file metadata from searchable evidence
 
-Canvas exposes structured assignment data as well as files that require separate discovery, download, parsing, and indexing. I designed the document workflow so that **file metadata is not confused with searchable content**. Managed storage tracks preparation and source state; incremental, bounded processing avoids indiscriminate downloads. The assistant must recognize missing or stale evidence instead of presenting it as verified.
+Canvas file listings do not imply the corresponding documents have been downloaded, extracted, or indexed. Hey Canvas tracks supported document preparation and provenance, processes content within bounded limits, and exposes unavailable-evidence states.
 
-### Protecting course context
+### Preventing cross-course confusion
 
-Academic help is only useful if the answer belongs to the correct course and assessment. The application keeps retrieval course-scoped, uses structured academic data where possible, and treats announcements and document text as **untrusted evidence rather than instructions**. Regression cases cover misleading authority claims, quoted prompt injections, course changes, and assessment exclusions.
+Course selection scopes relevant retrieval. Academic source text is treated as untrusted data, not as a new instruction to the assistant. Tests cover misleading instructions and incorrect course context; these safeguards do not establish immunity to all prompt-injection attempts.
 
-### Getting streaming and cancellation right
+### Streaming and cancellation
 
-A streaming AI response involves asynchronous request setup, database access, model generation, network delivery, and cleanup. Hard cancellation uncovered a SQLAlchemy session-lifecycle race. I added explicit coordination around setup and teardown and used targeted lifecycle tests to verify cancellation behavior without disrupting the database session.
+Streaming involves request setup, database access, model response delivery, and cleanup. Development uncovered a SQLAlchemy session-lifecycle race during cancellation. The application coordinates setup and teardown and includes targeted regression tests for cancellation behavior.
 
-### Distinguishing model behavior from application correctness
+### Testing model behavior separately from app behavior
 
-A slow or incorrect answer may come from the model, incomplete course evidence, or routing logic. I tested deterministic academic paths independently from real Ollama inference and added narrowly scoped deterministic explanations for stable graph-search concepts, such as BFS versus DFS and A* heuristic behavior. This improved targeted cases without claiming that a local 3B model is universally fast or accurate.
+Deterministic synthetic responses are useful for repeatable UI and integration tests, but they are **not** evidence that a live language model generated the displayed text. The public robotics screenshot is a prewritten synthetic demo. Ollama-backed generation is an optional, separate local mode.
 
-## Verification
+## Verification and limitations
 
-At the recorded V1.2 local integration checkpoint `e109d2c`:
+At the recorded V1.2 release checkpoint, the project reported **1,083 backend tests passing** and **310 frontend tests passing**. The [five-job GitHub Actions run](https://github.com/sathwikpareedula/hey-canvas/actions/runs/39676551978) passed on commit `487b6fc`, including history-secret scanning, frontend/backend tests, synthetic browser journeys, and Windows synthetic acceptance. These results describe that tested revision; consult current Actions runs for later changes.
 
-- **1,076 backend pytest tests passed**; Ruff and strict mypy passed across **206 Python files**.
-- **311 frontend tests passed** with **12 skipped**; TypeScript, ESLint, and the Webpack production build passed.
-- **7 Windows launcher tests passed**.
-- A full 22-scenario CPU-hosted Ollama rerun passed **16/22**. Five scenarios exceeded the 120-second bound; one comparison case returned a fallback outside its acceptance rule. All four originally failing safety/correctness cases passed in that rerun.
-- Three additional targeted real-provider scenarios passed after deterministic routing improvements; those tests are **not** a replacement for a full 22-case evaluation.
+The most recent complete 22-scenario real-Ollama evaluation recorded **16 passes out of 22**. It does not establish universal model accuracy or responsiveness. Browser microphone capture, live Canvas authorization on a fresh installation, and every third-party course-file format were not fully covered by the recorded clean-install acceptance. Some frontend integration-marked tests were skipped. See [VERIFICATION.md](VERIFICATION.md) for detailed scope and caveats.
 
-These results describe a **local development candidate**, not production use or accuracy with every course. Document coverage is incomplete, conversations currently persist in the browser rather than in a durable backend message store, and full final physical-device and security acceptance remain open.
+Data is stored locally by default, but **Canvas sync necessarily communicates with Canvas**. Optional browser voice features and external services have their own privacy considerations. Do not describe the project as zero-egress, FERPA-certified, or production-secure.
 
-## The result
+## Outcome
 
-Hey Canvas demonstrates how I approach a full-stack AI product: establish dependable data access, separate verified facts from inference, preserve source provenance, make asynchronous operations safe to interrupt, and test actual model behavior rather than relying on a polished demo.
+Hey Canvas demonstrates how I design a full-stack AI application: dependable data integration, explicit boundaries between facts and inference, course-scoped retrieval, cancellable asynchronous operations, and tests that distinguish a convincing demo from real-model reliability.
 
-The goal was never simply to add a chatbot to Canvas. It was to build the engineering around a course-aware assistant so it can be useful, inspectable, and honest about what it knows.
-
----
-
-**Project status:** V1.2 local acceptance candidate; release hold active. Independent project, not affiliated with or endorsed by Instructure. Synthetic fixtures are used for public screenshots. The application does not submit assignments or modify Canvas course data.
+**Status:** Public V1.2 source snapshot and locally tested release candidate; not a hosted production service. Independent student-built project, not affiliated with or endorsed by Instructure or a university. Public screenshots use synthetic data. The application does not submit assignments or modify Canvas course data.
