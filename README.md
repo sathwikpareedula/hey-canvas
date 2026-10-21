@@ -26,7 +26,7 @@ Hey Canvas connects academic questions to the **selected course, available recor
 
 ![Hey Canvas course-aware assistant interface with synthetic academic context](portfolio-assets/hey-canvas/02-ai-study-assistant.png)
 
-*The existing image shows the assistant interface with synthetic course data. A verified concept-explanation conversation and a grounded deadline-answer screenshot are being prepared separately; this image is not presented as proof of real-model accuracy.*
+*Screenshot from the synthetic demo: a course-aware, prewritten example explanation with sample source references. Optional Ollama-powered generation is a separate application mode.*
 
 ### The academic workspace behind the answers
 
