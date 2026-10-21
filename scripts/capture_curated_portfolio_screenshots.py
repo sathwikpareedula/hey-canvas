@@ -3,7 +3,7 @@
 Target directory: portfolio-assets/hey-canvas/
 Target files:
 1. 01-dashboard-desktop.png (1280x1050) - Primary Full-Stack project image
-2. 02-ai-study-assistant.png (1280x950) - Primary AI/ML project image with Quiz 3 study plan and citations
+2. 02-ai-study-assistant.png (1280x1350) - Synthetic two-link kinematics explanation with example evidence
 3. 03-today-priorities.png (1280x1000) - Populated daily academic view
 4. 04-deadline-calendar.png (1280x1150) - Calendar with a selected deadline
 5. 05-course-materials.png (1280x1000) - Course materials and provenance
