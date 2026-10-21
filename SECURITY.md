@@ -14,15 +14,10 @@ Hey Canvas is an independent, local-first student project and **not a hosted pro
 
 If you find a vulnerability or suspected credential exposure, do **not** open a public issue containing secrets, personal data, or exploit details. Contact the repository maintainer privately through an appropriate GitHub private reporting channel if one is enabled. If no private reporting channel is available, request a secure contact method without disclosing the issue publicly.
 
-## Release status
+## Public source release and verification
 
-V1.2 remains under release hold. A full pre-publication secret/history audit and physical Windows acceptance are required before changing repository visibility. A clean `.gitignore` alone does not prove Git history is free of secrets. See [VERIFICATION.md](VERIFICATION.md) for current test scope and limitations.
+This source repository is public. The original development repository remains private. The release's source-history and tracked-file secret scans were reported clean in [GitHub Actions run #39676551978](https://github.com/sathwikpareedula/hey-canvas/actions/runs/39676551978), which also passed backend, frontend, synthetic browser, and Windows synthetic acceptance checks.
 
-### Historical secret-scan classifications
+These scans do not guarantee that all future changes, third-party components, or runtime configurations are free of vulnerabilities. The current public repository's history and contents are the relevant publication scope; historical audit findings from the separate private development repository do not describe findings in this clean public history.
 
-The repository uses `.gitleaksignore` only for 13 reviewed, immutable finding fingerprints:
-
-- Twelve findings belong to a transient `.next-verify-18411` development build committed in `908c76c`. They are framework-generated preview/build secrets, not Canvas credentials, provider keys, private student data, or deployed application secrets. The generated tree is no longer present at `HEAD`.
-- One finding belongs to `backend/tests/services/test_sync_orchestrator.py` in `9ef3616`. It is a deliberately synthetic credential-redaction test value, not a usable credential. The current fixture constructs the marker without embedding a scanner-shaped token.
-
-No rule, path, directory, or commit is broadly excluded. Any finding with a different fingerprint continues to fail the complete-history and checked-out-file scans. This classification does not authorize reuse or deployment of the generated preview secrets.
+For limitations and historical testing context, see [VERIFICATION.md](VERIFICATION.md). The optional local Ollama mode has different behavior from the deterministic synthetic demonstration. Never treat a scripted demo response as proof of generated-model accuracy.
