@@ -4,7 +4,7 @@
 
 Hey Canvas V1.2 is a **local-first acceptance candidate**, not a publicly deployed production service.
 
-## Latest verified review-branch acceptance (October 20, 2026)
+## Historical private-development acceptance (October 20, 2026)
 
 At functional checkpoint `d84f842100937abd8623d095c294e9269a9b5d34`, [GitHub Actions run 39543019631](https://github.com/sathwikpareedula/UTA-Academic-Copilot/actions/runs/39543019631) completed:
 
@@ -23,7 +23,7 @@ The 13 reviewed history findings remain in reachable commits but are narrowly cl
 
 A fresh GitHub-hosted Windows checkout successfully installed dependencies, initialized a disposable SQLite database, started the backend/frontend without Canvas credentials or Ollama, served health/startup/dashboard endpoints, handled repeated launch, and stopped/restarted its owned processes. It also launched the explicit isolated demo, verified the synthetic provider, and confirmed that the populated course catalog contained only synthetic course identifiers. This **does not verify** real institutional Canvas authorization/sync, real local-model inference, physical microphone permission behavior, or installation on every user's machine.
 
-**Decision:** suitable for a controlled private release-candidate evaluation with documented limitations. Public release and merge remain on hold pending explicit authorization and remaining acceptance/risk decisions.
+**Decision:** suitable for a controlled private release-candidate evaluation with documented limitations. That earlier publication hold was superseded by the public source release noted at the top of this document.
 
 ## Earlier recorded verification
 
@@ -62,7 +62,7 @@ During manual testing, the application displayed a successful Canvas synchroniza
 
 The manual test also exposed limitations: local-model explanations could be slow, one question timed out and fell back to indexed evidence, and responses were not consistently useful when assignment descriptions were missing. A successful sync indicator does not by itself validate every synchronized record or every AI answer. These issues remain open; no performance or accuracy guarantee is claimed.
 
-## Latest review-branch CI observation (October 20, 2026)
+## Historical private-development CI observation (October 20, 2026)
 
 GitHub Actions run [39369667628](https://github.com/sathwikpareedula/UTA-Academic-Copilot/actions/runs/39369667628), associated with documentation commit `d48aab91`, completed with:
 
