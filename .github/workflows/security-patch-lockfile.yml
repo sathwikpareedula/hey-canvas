@@ -1,0 +1,44 @@
+name: Temporary security patch lockfile generation
+
+on:
+  pull_request:
+    paths:
+      - "frontend/package.json"
+      - ".github/workflows/security-patch-lockfile.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+      - name: Generate patched npm lockfile without executing package scripts
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Confirm pinned security versions
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          for (const [name, version] of Object.entries({
+            next: '16.4.1', react: '19.2.9', 'react-dom': '19.2.9',
+            'eslint-config-next': '16.4.1'
+          })) {
+            if (lock.packages['node_modules/' + name]?.version !== version) {
+              throw new Error(name + ' version mismatch in lockfile');
+            }
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-package-lock
+          path: frontend/package-lock.json
+          if-no-files-found: error
