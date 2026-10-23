@@ -5,8 +5,8 @@ This guide is for a **fresh checkout**, not an upgrade of an existing student da
 ## Prerequisites
 
 - Python 3.12 or newer and Git.
-- Node.js/npm compatible with the lockfile. **Node 22.13+ (prefer a current supported LTS release)** avoids a known engine warning from a development dependency; Node 22.11 produced a warning during October 2026 acceptance.
-- Ollama is optional for academic records, but required for local generated explanations. Install a compatible model explicitly; model downloads are not automatic.
+- Node.js/npm compatible with the lockfile. Use a **security-patched supported LTS**: Node 22.23.4+ on the 22.x line or Node 24.22.1+ on the 24.x line. Older Node 22.13+ releases avoid a development-dependency engine warning but may still lack October 2026 security fixes.
+- Ollama is optional for academic records, but required for local generated explanations. Use **Ollama 0.35.0 or later** to include October 2026 security fixes; install a compatible model explicitly. Model downloads are not automatic.
 
 ## Fresh installation
 

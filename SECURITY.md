@@ -10,6 +10,14 @@ Hey Canvas is an independent, local-first student project and **not a hosted pro
 - Local Ollama inference can run on-device; **Canvas synchronization still contacts Canvas**. Optional external AI providers and browser speech functionality may have separate data-handling implications.
 - Academic retrieval treats course materials as untrusted evidence, not executable instructions. Verify generated academic guidance against primary sources.
 
+## Local runtime security updates (October 2026)
+
+Hey Canvas does not bundle Node.js or Ollama; each user must update those programs on their own computer.
+
+- **Node.js:** The October 21, 2026 security releases patched vulnerabilities in supported Node 22, 24, and 26 lines. Use Node 22.23.4+ on the 22.x line or Node 24.22.1+ on the 24.x line (or another currently patched supported line). See the [official Node.js security release](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases).
+- **Ollama:** Local inference is optional. Versions older than 0.35.0 may lack the fix for [CVE-2026-103663](https://nvd.nist.gov/vuln/detail/CVE-2026-103663), a path-traversal issue in the model-pull endpoint that can lead to code execution in some deployments. Ollama 0.34.2 also fixed [CVE-2026-108836](https://nvd.nist.gov/vuln/detail/CVE-2026-108836), a pull-API SSRF issue. Use Ollama 0.35.0+ and keep its HTTP API bound to loopback rather than exposed to other devices or the internet.
+- Upgrading this repository does **not** automatically upgrade an existing user's Node.js or Ollama installation. Check installed versions before using real Canvas credentials.
+
 ## Responsible reporting
 
 If you find a vulnerability or suspected credential exposure, do **not** open a public issue containing secrets, personal data, or exploit details. Contact the repository maintainer privately through an appropriate GitHub private reporting channel if one is enabled. If no private reporting channel is available, request a secure contact method without disclosing the issue publicly.
