@@ -123,7 +123,7 @@ The release audit reported **1,083 backend tests passed**, **310 frontend tests 
 
 ## Local development (Windows)
 
-**Prerequisites:** Python 3.12+, Node.js 22.13+ (or another compatible supported LTS version) and npm, and Ollama with a locally installed model if using AI generation.
+**Prerequisites:** Python 3.12+, npm, and a security-patched supported Node.js LTS release (Node 22.23.4+ on the 22.x line or Node 24.22.1+ on the 24.x line). For optional local AI, use Ollama 0.35.0 or later with an explicitly installed compatible model.
 
 ```powershell
 git clone https://github.com/sathwikpareedula/hey-canvas.git
