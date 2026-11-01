@@ -25,7 +25,12 @@ jobs:
       - name: Validate Python dependency lockfile
         run: |
           python -m pip install uv==0.10.0
-          uv lock --check
+          if ! uv lock --check; then
+            uv lock
+            git diff -- uv.lock
+            echo "uv.lock needs regeneration; refusing to pass until committed lock is canonical"
+            exit 1
+          fi
       - name: Targeted evidence regressions
         run: python -m pytest -q backend/tests/test_academic_evidence_compaction_v12.py
       - name: Full backend tests
