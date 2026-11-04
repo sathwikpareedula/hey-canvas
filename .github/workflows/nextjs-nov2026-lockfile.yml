@@ -1,0 +1,47 @@
+name: Temporary Next.js 16.4.5 lockfile regeneration
+on:
+  push:
+    branches:
+      - security/nextjs-nov2026-1645
+    paths:
+      - .github/workflows/nextjs-nov2026-lockfile.yml
+      - frontend/package.json
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.4"
+      - name: Resolve lockfile without executing package scripts
+        working-directory: frontend
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Validate locked dependency installation
+        working-directory: frontend
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify requested security version
+        working-directory: frontend
+        run: |
+          node -e 'const p=require("./package-lock.json");if(p.packages[""].dependencies.next!=="16.4.5"||p.packages["node_modules/next"].version!=="16.4.5"||p.packages[""].devDependencies["eslint-config-next"]!=="16.4.5")process.exit(1)'
+      - name: Production security audit
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
+      - name: Commit validated lockfile to isolated branch only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "security: regenerate lockfile for Next.js 16.4.5"
+            git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push https://github.com/sathwikpareedula/hey-canvas.git HEAD:refs/heads/security/nextjs-nov2026-1645
+          fi
